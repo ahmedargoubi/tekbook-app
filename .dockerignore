@@ -1,0 +1,12 @@
+.git
+.env
+config/application-local.properties
+target/
+*.log
+
+# Lab10 - artefacts SAST/DAST hors image
+SqlExample.java
+tekbook-rules.yml
+semgrep-report.json
+zap-baseline.html
+*.bak

@@ -3,11 +3,21 @@ target/
 .idea/
 .vscode/
 .DS_Store
-Dockerfile
-.dockerignore
 .env
 .env
 .env
 .env
 yes
 yes.pub
+
+# Lab10 - artefacts à ne pas committer
+semgrep-report.json
+zap-baseline.html
+trivy-D.json
+dependencies.txt
+*.bak
+
+# CI artifacts
+semgrep-report.json
+zap-baseline.html
+report_html.html
