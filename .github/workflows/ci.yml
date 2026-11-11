@@ -23,7 +23,7 @@ jobs:
           name: tekbook-jar
           path: target/*.jar
 
-  # --- B2 : SAST avec --error (job rouge, gate actif) ---
+  # --- B3 : SAST avec gate actif (--error) ---
   semgrep_scan:
     runs-on: ubuntu-latest
     needs: build
@@ -44,3 +44,48 @@ jobs:
         with:
           name: semgrep-report
           path: semgrep-report.json
+
+  # --- D1 : placeholder de déploiement staging ---
+  # needs: semgrep_scan => si SAST rouge, ce job est SKIPPED (preuve du gate)
+  deploy_staging:
+    runs-on: ubuntu-latest
+    needs: semgrep_scan
+    steps:
+      - name: Check STAGING_URL secret
+        run: |
+          if [ -z "${{ secrets.STAGING_URL }}" ]; then
+            echo "::warning::STAGING_URL absent - pas de staging accessible depuis ce runner."
+            echo "DAST en CI : documente comme limite d'environnement dans le rapport."
+            exit 0
+          fi
+          echo "Staging defini, cible disponible."
+
+  # --- D1 : baseline DAST apres staging ---
+  dast_baseline:
+    runs-on: ubuntu-latest
+    needs: deploy_staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check if staging available
+        id: check
+        run: |
+          if [ -z "${{ secrets.STAGING_URL }}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: ZAP Baseline
+        if: steps.check.outputs.skip == 'false'
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: ${{ secrets.STAGING_URL }}
+          fail_action: true
+      - name: Note - pas de staging configure
+        if: steps.check.outputs.skip == 'true'
+        run: echo "DAST en CI non execute - limite d'environnement documentee."
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-baseline
+          path: report_html.html
+          if-no-files-found: ignore
