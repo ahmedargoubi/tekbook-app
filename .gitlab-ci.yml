@@ -1,0 +1,20 @@
+stages:
+  - security
+
+
+container_scan:
+  stage: security
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  variables:
+    TRIVY_CACHE_DIR: .trivy
+    TRIVY_SKIP_VERSION_CHECK: "true"
+  cache:
+    key: trivy-db
+    paths:
+      - .trivy
+  script:
+    # Politique : CRITICAL BLOQUE, HIGH et moins sont tracés
+    - trivy image --exit-code 1 --severity CRITICAL --scanners vuln --timeout 30m "tekbook-app:$CI_COMMIT_SHA"
+    - trivy image --exit-code 0 --severity HIGH     --scanners vuln --timeout 30m "tekbook-app:$CI_COMMIT_SHA"

@@ -1,0 +1,12 @@
+rules:
+  - id: tekbook-http-to-sql
+    languages: [java]
+    severity: ERROR
+    message: Donnee HTTP dans SQL. Utiliser des parametres.
+    mode: taint
+    pattern-sources:
+      - pattern: $REQ.getParameter(...)
+    pattern-sinks:
+      - patterns:
+          - pattern: $STMT.executeQuery($SQL)
+          - focus-metavariable: $SQL
