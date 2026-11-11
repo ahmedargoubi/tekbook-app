@@ -21,3 +21,8 @@ dependencies.txt
 semgrep-report.json
 zap-baseline.html
 report_html.html
+
+# CI artifacts
+semgrep-report.json
+zap-baseline.html
+report_html.html
