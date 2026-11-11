@@ -23,7 +23,7 @@ jobs:
           name: tekbook-jar
           path: target/*.jar
 
-  # --- B1 : SAST sans --error (job vert avec alerte) ---
+  # --- B2 : SAST avec --error (job rouge, gate actif) ---
   semgrep_scan:
     runs-on: ubuntu-latest
     needs: build
@@ -37,9 +37,8 @@ jobs:
       - name: Run Semgrep
         run: |
           semgrep --version
-          semgrep scan --config tekbook-rules.yml \
+          semgrep scan --config tekbook-rules.yml --error \
             --metrics=off --json --output semgrep-report.json .
-          echo "Exit code: $?"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
